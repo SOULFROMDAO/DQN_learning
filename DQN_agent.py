@@ -1,17 +1,20 @@
 import random
-
+import gym
+import os
 import numpy as np
 import torch
 from torch import optim, nn
-from utiles import get_device
+from utiles import get_device, get_logger
+
+logger = get_logger(__name__)
 
 
 class AgentMEMO:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory_size = 1000
-        self.batch_size = 64
+        self.memory_size = 100000
+        self.batch_size = 512
 
         self.all_state = np.empty((self.memory_size, self.state_size), dtype=np.float32)
         self.all_action = np.random.randint(0, self.action_size, self.memory_size, dtype=np.int64)
@@ -64,14 +67,12 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
-        self.hiden_size = 88
+        self.hiden_size = 128
 
         self.net = nn.Sequential(
-            nn.Linear(self.input_size, self.hiden_size, device=get_device()),
+            nn.Linear(self.input_size, self.hiden_size, device=get_device(), dtype=torch.float32),
             nn.Tanh(),
-            nn.Linear(self.hiden_size, self.hiden_size, device=get_device()),
-            nn.ReLU(),
-            nn.Linear(self.hiden_size, self.output_size, device=get_device()),
+            nn.Linear(self.hiden_size, self.output_size, device=get_device(), dtype=torch.float32),
         )
 
     def forward(self, x):
@@ -85,11 +86,11 @@ class DQN(nn.Module):
         return action
 
 
-class Agent:
-    def __init__(self, state_size, action_size, learn_rate):
+class DQNAgent:
+    def __init__(self, state_size, action_size, learn_rate, gamma):
         self.state_size = state_size
         self.action_size = action_size
-        self.GAMMA = 0.99
+        self.GAMMA = gamma
         self.learn_rate = learn_rate
 
         self.memo = AgentMEMO(state_size, action_size)
@@ -98,4 +99,18 @@ class Agent:
 
         self.optimizer = optim.Adam(self.online_net.parameters(), lr=self.learn_rate)
 
+    def load_checkpoint(self, path):
+        logger.info(f"Loading model from {path}")
+        os.path.exists(path)
+        self.online_net.load_state_dict(torch.load(path))
 
+    def save_checkpoint(self, path):
+        logger.info(f"Saving model to {path}")
+        torch.save(self.target_net.state_dict(), path)
+
+def initialize_dqn(learn_rate, gamma, game_name='CartPole-v1'):
+    env = gym.make(game_name)
+    state_size = env.observation_space.shape[0]
+    action_size = env.action_space.n
+    agent = DQNAgent(state_size, action_size, learn_rate, gamma)
+    return env, agent

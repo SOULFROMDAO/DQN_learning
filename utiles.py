@@ -1,6 +1,6 @@
 import logging
-
 import torch
+
 
 def get_device(only_cpu=True):
     if torch.cuda.is_available() and not only_cpu:

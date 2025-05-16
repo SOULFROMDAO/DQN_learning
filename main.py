@@ -1,21 +1,23 @@
-import gym
+from DQN_train import train
+from DQN_test import valid
+from DQN_agent import initialize_dqn
 
-from rl_train import train
-from agent import Agent
 
-env = gym.make('CartPole-v1')
-n_episode = 5000
-target_update_interval = 100
-n_step = 1000
-epsilon_decay_rate = 0.2
-epsilon_start = 1.0
-epsilon_end = 0.02
-learn_rate = 1e-4
+iteration = 500
+steps_per_episode = 500
+batch_episode = 50
+save_interval = 100
 
-def agent_provider(state_size, action_size):
-    agent = Agent(state_size, action_size, learn_rate)
-    return agent
+learn_rate = 1e-3
+gamma = 0.99
 
+do_train = False
+do_test = True
+ckpt_path = f"DQN_model.pth"
 
 if __name__ == '__main__':
-    train(env, n_episode, n_step, epsilon_decay_rate, epsilon_start, epsilon_end, target_update_interval, agent_provider)
+    env, agent = initialize_dqn(learn_rate, gamma)
+    if do_train:
+        train(env, agent, iteration, steps_per_episode, batch_episode, save_interval, ckpt_path)
+    if do_test:
+        valid(env, agent, ckpt_path)
