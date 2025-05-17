@@ -1,8 +1,8 @@
 import time
 
 
-def valid(env, agent, ckpt_path):
-    agent.load_checkpoint(ckpt_path)
+def valid(env, agent, version):
+    agent.load_checkpoint(version)
     state = env.reset()
     while True:
         action = agent.online_net.act(state)

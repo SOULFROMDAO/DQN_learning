@@ -99,12 +99,14 @@ class DQNAgent:
 
         self.optimizer = optim.Adam(self.online_net.parameters(), lr=self.learn_rate)
 
-    def load_checkpoint(self, path):
+    def load_checkpoint(self, train_iter):
+        path = f"DQN_model_{train_iter}.pth"
         logger.info(f"Loading model from {path}")
-        os.path.exists(path)
         self.online_net.load_state_dict(torch.load(path))
+        self.target_net.load_state_dict(torch.load(path))
 
-    def save_checkpoint(self, path):
+    def save_checkpoint(self, train_iter):
+        path = f"DQN_model_{train_iter}.pth"
         logger.info(f"Saving model to {path}")
         torch.save(self.target_net.state_dict(), path)
 

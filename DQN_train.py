@@ -16,7 +16,7 @@ def get_epsilon_func(n_episode, n_step):
     return epsilon_func
 
 
-def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval, ckpt_path, do_log=True):
+def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval, do_log=True):
     n_episode = iteration * batch_episode
     train_iter = 0
     loss_for_log = 0
@@ -42,10 +42,10 @@ def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval
                   f"max reward: {max_reward:>3.2f} | "
                   f"loss: {loss_for_log:>2.8f}")
 
-        if ckpt_path and train_iter % save_interval == 0:
-            agent.save_checkpoint(ckpt_path)
+        if train_iter % save_interval == 0:
+            agent.save_checkpoint(train_iter)
 
-    agent.save_checkpoint(ckpt_path)
+    agent.save_checkpoint(train_iter)
     return plot_data
 
 

@@ -16,15 +16,14 @@ gamma = 0.99
 
 do_train = True
 do_test = True
-ckpt_path = f"DQN_model.pth"
 
 if __name__ == '__main__':
     env, agent = initialize_dqn(learn_rate, gamma)
     if do_train:
-        plot_data = train(env, agent, iteration, steps_per_episode, batch_episode, save_interval, ckpt_path)
+        plot_data = train(env, agent, iteration, steps_per_episode, batch_episode, save_interval)
         plot_train_process(plot_data)
     if do_test:
-        valid(env, agent, ckpt_path)
+        valid(env, agent, iteration)
 
 
 atexit.register(rename_train_log)
