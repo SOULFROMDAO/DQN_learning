@@ -1,6 +1,5 @@
 import numpy as np
 import random
-
 import torch
 from arguments import Epsilon
 from utiles import get_device, get_logger
@@ -21,6 +20,7 @@ def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval
     n_episode = iteration * batch_episode
     train_iter = 0
     loss_for_log = 0
+    plot_data = {}
     while train_iter < iteration:
         update_reward_storage = np.zeros(batch_episode)
         for i_episode in range(batch_episode):
@@ -33,16 +33,20 @@ def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval
         agent.target_net.load_state_dict(agent.online_net.state_dict())
         train_iter += 1
         if do_log:
+            mean_reward = np.mean(update_reward_storage)
+            plot_data[train_iter] = mean_reward
+            max_reward = np.max(update_reward_storage)
             #log
             logger.info(f"iteration: {train_iter:>5.0f}/{iteration:>5.0f} | "
-                  f"reward: {np.mean(update_reward_storage):>3.2f} | "
-                  f"max reward: {np.max(update_reward_storage):>3.2f} | "
+                  f"mean reward: {mean_reward:>3.2f} | "
+                  f"max reward: {max_reward:>3.2f} | "
                   f"loss: {loss_for_log:>2.8f}")
 
         if ckpt_path and train_iter % save_interval == 0:
             agent.save_checkpoint(ckpt_path)
 
     agent.save_checkpoint(ckpt_path)
+    return plot_data
 
 
 def train_step(steps_per_episode, i_episode, batch_episode, train_iter, env, agent, n_episode):
@@ -57,7 +61,7 @@ def train_step(steps_per_episode, i_episode, batch_episode, train_iter, env, age
         else:
             action = agent.online_net.act(state)
         state_new, reward, done, info = env.step(action)
-        reward = reword_func(reward, state_new, env)
+        reward = reward_func(reward, state_new, env)
         agent.memo.memo_add(state, action, reward, done, state_new)
         state = state_new
         episode_reward += 1
@@ -87,7 +91,7 @@ def train_step(steps_per_episode, i_episode, batch_episode, train_iter, env, age
     return episode_reward, state, loss_for_log
 
 
-def reword_func(reword, state, env):
-    reword += 1 - abs(state[0]) / env.x_threshold
-    reword += 1 - abs(state[2]) / env.theta_threshold_radians
-    return reword
+def reward_func(reward, state, env):
+    reward += 1 - abs(state[0]) / env.x_threshold
+    reward += 1 - abs(state[2]) / env.theta_threshold_radians
+    return reward
