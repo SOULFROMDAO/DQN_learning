@@ -32,6 +32,7 @@ def train(env, agent, iteration, steps_per_episode, batch_episode, save_interval
         # update target net
         agent.target_net.load_state_dict(agent.online_net.state_dict())
         train_iter += 1
+
         if do_log:
             mean_reward = np.mean(update_reward_storage)
             plot_data[train_iter] = mean_reward

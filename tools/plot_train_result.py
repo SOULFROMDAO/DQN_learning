@@ -40,7 +40,7 @@ def plot_compare(log_folder):
                 if match:
                     iterations.append(int(match.group(1)))
                     rewards.append(float(match.group(2)))
-        plt.plot(iterations, rewards, '-', label=log)
+        plt.plot(iterations, rewards, '-', label=log.split('.')[0])
     plt.xlabel('iteration')
     plt.ylabel('reward')
     plt.title('training compare')

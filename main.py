@@ -6,8 +6,8 @@ from DQN_agent import initialize_dqn
 from tools.plot_train_result import plot_train_process
 from utiles import rename_train_log
 
-iteration = 5
-steps_per_episode = 5
+iteration = 500
+steps_per_episode = 500
 batch_episode = 50
 save_interval = 100
 
